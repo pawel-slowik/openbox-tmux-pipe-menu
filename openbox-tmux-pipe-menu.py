@@ -1,6 +1,4 @@
-#!/usr/bin/env python2.7
-
-from __future__ import print_function
+#!/usr/bin/env python3
 
 import subprocess
 import re
@@ -8,7 +6,8 @@ import xml.etree.ElementTree as et
 import datetime as dt
 import pipes
 import os
-import ConfigParser
+import configparser
+import sys
 
 class TmuxError(Exception):
     pass
@@ -36,6 +35,8 @@ def list_sessions_cmd():
             stderr=subprocess.PIPE
         )
         out, err = process.communicate()
+        out = out.decode('utf-8')
+        err = err.decode('utf-8')
     except Exception as ex:
         raise TmuxCommandError(repr(ex).strip())
     if process.returncode == 0:
@@ -81,11 +82,11 @@ def session_label(s):
     return label
 
 def reattach_cmd_template():
-    config = ConfigParser.RawConfigParser()
+    config = configparser.RawConfigParser()
     config.read(os.path.expanduser('~/.config/openbox/tmux.ini'))
     try:
         return config.get('pipe-menu', 'attach-command-template')
-    except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+    except (configparser.NoSectionError, configparser.NoOptionError):
         pass
     term = find_executable(['urxvt', 'xterm'])
     if term is None:
@@ -111,7 +112,7 @@ def main():
         xml = session_list_to_xml(parse_sessions(list_sessions_cmd()))
     except (TmuxError, ConfigError) as err:
         xml = error_message_to_xml(err.message)
-    print(xml)
+    sys.stdout.buffer.write(xml)
 
 if __name__ == '__main__':
     main()
