@@ -43,6 +43,8 @@ def list_sessions_cmd():
         return out
     if  'no server running' in err:
         return ''
+    if re.search(r'^error connecting to .+ \(No such file or directory\)$', err):
+        return ''
     raise TmuxCommandError(err.strip())
 
 def parse_sessions(text):
