@@ -52,7 +52,7 @@ def parse_sessions(text):
 
 def parse_session_line(line):
     match = re.search(
-        '^(?P<attached>[01]) (?P<timestamp>[0-9]+) (?P<name>.*)$',
+        '^(?P<attached>[0-9]+) (?P<timestamp>[0-9]+) (?P<name>.*)$',
         line
     )
     if match is None:
