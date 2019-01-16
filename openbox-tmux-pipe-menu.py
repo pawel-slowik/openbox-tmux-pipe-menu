@@ -64,22 +64,22 @@ def session_list_to_xml(sessions):
         return error_message_to_xml('no sessions')
     root = et.Element('openbox_pipe_menu')
     cmd_tpl = reattach_cmd_template()
-    for s in sessions:
+    for session in sessions:
         item = et.SubElement(root, 'item')
-        item.attrib['label'] = session_label(s)
+        item.attrib['label'] = session_label(session)
         action = et.SubElement(item, 'action')
         action.attrib['name'] = 'Execute'
         command = et.SubElement(action, 'command')
         # the command is parsed with the g_shell_parse_argv funcion
         # and therefore must have shell quoting (even though it does
         # not spawn a shell)
-        command.text = cmd_tpl % pipes.quote(s['name'])
+        command.text = cmd_tpl % pipes.quote(session['name'])
     return et.tostring(root)
 
-def session_label(s):
-    label = s['name'] + ' started at '
-    label += dt.datetime.fromtimestamp(float(s['timestamp'])).isoformat()
-    if int(s['attached']):
+def session_label(session):
+    label = session['name'] + ' started at '
+    label += dt.datetime.fromtimestamp(float(session['timestamp'])).isoformat()
+    if int(session['attached']):
         label += ' (attached)'
     return label
 
@@ -104,10 +104,10 @@ def error_message_to_xml(message):
 def find_executable(names):
     path = os.environ.get("PATH", os.defpath).split(os.pathsep)
     for name in names:
-        for d in path:
-            f = os.path.join(d, name)
-            if os.path.exists(f):
-                return f
+        for directory in path:
+            filename = os.path.join(directory, name)
+            if os.path.exists(filename):
+                return filename
 
 def main():
     try:
