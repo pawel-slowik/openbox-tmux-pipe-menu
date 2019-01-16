@@ -108,6 +108,7 @@ def find_executable(names):
             filename = os.path.join(directory, name)
             if os.path.exists(filename):
                 return filename
+    return None
 
 def main():
     try:
