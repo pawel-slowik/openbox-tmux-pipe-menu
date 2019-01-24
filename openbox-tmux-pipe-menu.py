@@ -115,8 +115,7 @@ def main() -> None:
     try:
         xml = session_list_to_xml(parse_sessions(list_sessions_cmd()))
     except (TmuxError, ConfigError) as err:
-        err_msg = err.message if hasattr(err, 'message') else str(err)
-        xml = error_message_to_xml(err_msg)
+        xml = error_message_to_xml(repr(err))
     sys.stdout.buffer.write(xml)
 
 if __name__ == '__main__':
