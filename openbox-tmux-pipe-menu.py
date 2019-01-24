@@ -8,6 +8,7 @@ import pipes
 import os
 import configparser
 import sys
+from typing import Iterable, Optional, Dict
 
 class TmuxError(Exception):
     pass
@@ -21,7 +22,7 @@ class TmuxParseError(TmuxError):
 class ConfigError(Exception):
     pass
 
-def list_sessions_cmd():
+def list_sessions_cmd() -> str:
     command = [
         'tmux',
         'list-sessions',
@@ -47,10 +48,10 @@ def list_sessions_cmd():
         return ''
     raise TmuxCommandError(err.strip())
 
-def parse_sessions(text):
+def parse_sessions(text: str) -> Iterable[Dict[str, str]]:
     return [parse_session_line(l) for l in text.splitlines()]
 
-def parse_session_line(line):
+def parse_session_line(line: str) -> Dict[str, str]:
     match = re.search(
         '^(?P<attached>[0-9]+) (?P<timestamp>[0-9]+) (?P<name>.*)$',
         line
@@ -59,7 +60,7 @@ def parse_session_line(line):
         raise TmuxParseError('parse error: ' + line)
     return match.groupdict()
 
-def session_list_to_xml(sessions):
+def session_list_to_xml(sessions: Iterable[dict]) -> bytes:
     if not sessions:
         return error_message_to_xml('no sessions')
     root = et.Element('openbox_pipe_menu')
@@ -76,14 +77,14 @@ def session_list_to_xml(sessions):
         command.text = cmd_tpl % pipes.quote(session['name'])
     return et.tostring(root)
 
-def session_label(session):
+def session_label(session: Dict[str, str]) -> str:
     label = session['name'] + ' started at '
     label += dt.datetime.fromtimestamp(float(session['timestamp'])).isoformat()
     if int(session['attached']):
         label += ' (attached)'
     return label
 
-def reattach_cmd_template():
+def reattach_cmd_template() -> str:
     config = configparser.RawConfigParser()
     config.read(os.path.expanduser('~/.config/openbox/tmux.ini'))
     try:
@@ -95,13 +96,13 @@ def reattach_cmd_template():
         raise ConfigError("can't find terminal emulator")
     return term + ' -e tmux attach -d -t %s'
 
-def error_message_to_xml(message):
+def error_message_to_xml(message: str) -> bytes:
     root = et.Element('openbox_pipe_menu')
     item = et.SubElement(root, 'item')
     item.attrib['label'] = message
     return et.tostring(root)
 
-def find_executable(names):
+def find_executable(names: Iterable[str]) -> Optional[str]:
     path = os.environ.get("PATH", os.defpath).split(os.pathsep)
     for name in names:
         for directory in path:
@@ -110,7 +111,7 @@ def find_executable(names):
                 return filename
     return None
 
-def main():
+def main() -> None:
     try:
         xml = session_list_to_xml(parse_sessions(list_sessions_cmd()))
     except (TmuxError, ConfigError) as err:
