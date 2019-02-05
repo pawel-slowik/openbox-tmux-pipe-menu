@@ -75,7 +75,7 @@ def session_list_to_xml(sessions: Iterable[dict]) -> bytes:
         # and therefore must have shell quoting (even though it does
         # not spawn a shell)
         command.text = cmd_tpl % pipes.quote(session['name'])
-    return et.tostring(root)
+    return et.tostring(root) # type: ignore
 
 def session_label(session: Dict[str, str]) -> str:
     label = session['name'] + ' started at '
@@ -100,7 +100,7 @@ def error_message_to_xml(message: str) -> bytes:
     root = et.Element('openbox_pipe_menu')
     item = et.SubElement(root, 'item')
     item.attrib['label'] = message
-    return et.tostring(root)
+    return et.tostring(root) # type: ignore
 
 def find_executable(names: Iterable[str]) -> Optional[str]:
     path = os.environ.get("PATH", os.defpath).split(os.pathsep)
