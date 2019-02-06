@@ -41,7 +41,7 @@ def list_sessions_cmd() -> str:
     except Exception as ex:
         raise TmuxCommandError(repr(ex).strip())
     if process.returncode == 0:
-        return out
+        return out # type: ignore
     if  'no server running' in err:
         return ''
     if re.search(r'^error connecting to .+ \(No such file or directory\)$', err):
