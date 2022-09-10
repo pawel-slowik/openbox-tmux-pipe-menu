@@ -41,17 +41,15 @@ def list_sessions_cmd() -> str:
             stderr=subprocess.PIPE
         )
         out, err = process.communicate()
-        out = out.decode('utf-8')
-        err = err.decode('utf-8')
     except Exception as ex:
         raise TmuxCommandError(repr(ex).strip())
     if process.returncode == 0:
-        return out  # type: ignore
-    if 'no server running' in err:
+        return out.decode('utf-8')
+    if b'no server running' in err:
         return ''
-    if re.search(r'^error connecting to .+ \(No such file or directory\)$', err):
+    if re.search(br'^error connecting to .+ \(No such file or directory\)$', err):
         return ''
-    raise TmuxCommandError(err.strip())
+    raise TmuxCommandError(err.decode('utf-8').strip())
 
 
 def parse_sessions(text: str) -> Iterable[Dict[str, str]]:
@@ -83,7 +81,7 @@ def session_list_to_xml(sessions: Iterable[dict]) -> bytes:
         # and therefore must have shell quoting (even though it does
         # not spawn a shell)
         command.text = cmd_tpl % pipes.quote(session['name'])
-    return et.tostring(root)  # type: ignore
+    return et.tostring(root)
 
 
 def session_label(session: Dict[str, str]) -> str:
@@ -111,7 +109,7 @@ def error_message_to_xml(message: str) -> bytes:
     root = et.Element('openbox_pipe_menu')
     item = et.SubElement(root, 'item')
     item.attrib['label'] = message
-    return et.tostring(root)  # type: ignore
+    return et.tostring(root)
 
 
 def find_executable(names: Iterable[str]) -> Optional[str]:
