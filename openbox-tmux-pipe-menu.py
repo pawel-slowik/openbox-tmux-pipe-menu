@@ -35,15 +35,16 @@ def list_sessions_cmd() -> str:
         '#{session_attached} #{session_created} #{session_name}',
     ]
     try:
-        process = subprocess.Popen(
+        with subprocess.Popen(
             command,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
-        )
-        out, err = process.communicate()
+        ) as process:
+            out, err = process.communicate()
+            returncode = process.returncode
     except Exception as ex:
-        raise TmuxCommandError(repr(ex).strip())
-    if process.returncode == 0:
+        raise TmuxCommandError(repr(ex).strip()) from ex
+    if returncode == 0:
         return out.decode('utf-8')
     if b'no server running' in err:
         return ''
