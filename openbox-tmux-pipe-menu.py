@@ -4,7 +4,7 @@ import subprocess
 import re
 import xml.etree.ElementTree as et
 import datetime as dt
-import pipes
+import shlex
 import os
 import configparser
 import sys
@@ -81,7 +81,7 @@ def session_list_to_xml(sessions: Iterable[dict]) -> bytes:
         # the command is parsed with the g_shell_parse_argv funcion
         # and therefore must have shell quoting (even though it does
         # not spawn a shell)
-        command.text = cmd_tpl % pipes.quote(session['name'])
+        command.text = cmd_tpl % shlex.quote(session['name'])
     return et.tostring(root)
 
 
